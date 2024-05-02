@@ -94,15 +94,14 @@ class handleMissingValues(Resource):
             if missingValues[i]>0:
                 missingValueColumns.append(columns[i])
         for i in missingValueColumns:
-            match selected_action:
-                case "remove entire row":
+            if(selected_action=="remove entire row"):
                     data.dropna(subset=[i])
-                case "remove entire column":
+            elif selected_action=="remove entire column":
                     data.drop(i,axis=1,inplace=True)
-                case "replace missing values with median":
+            elif selected_action== "replace missing values with median":
                     median=data[i].median()
                     data[i].fillna(median,inplace=True)
-                case "replace missing values with mean":
+            elif selected_action== "replace missing values with mean":
                     mean=data[i].mean()
                     data[i].fillna(mean,inplace=True)
         return {'selected_Action': selected_action,
@@ -135,8 +134,7 @@ class HandleCategoricalData(Resource):
         for i in range(len(columns)):
             if(dtypes[i]=='O'):
                 catColumns.append(columns[i])
-        match selected_encoder:
-            case "Ordinal Encoder":
+        if selected_encoder=="Ordinal Encoder":
                 ordinal_encoder=OrdinalEncoder()
                 data_cat=data[catColumns]
                 data[catColumns]=ordinal_encoder.fit_transform(data_cat)
@@ -144,7 +142,7 @@ class HandleCategoricalData(Resource):
                     "Selected Encoder":selected_encoder,
                     "Status":"encoding Done successful."
                     },200
-            case "one-hot encoding":
+        if selected_encoder=="one-hot encoding":
                 one_hot_encoder=OneHotEncoder(sparse_output=False)
                 data_cat=data[catColumns]
                 data_cat_1hot=one_hot_encoder.fit_transform(data_cat)
@@ -209,11 +207,10 @@ class performDataScaling(Resource):
     def get(self):
         args = scalerParcer.parse_args()  # Parse the query parameters
         selected_scaler = args['scaler']
-        match selected_scaler:
-            case "MinMaxScaler":
+        if selected_scaler=="MinMaxScaler":
                 scaler=MinMaxScaler()
                 updatePreparedData(scaler.fit_transform(dataPrepared))
-            case "StandardScaler":
+        elif selected_scaler=="StandardScaler":
                 scaler=StandardScaler()
                 updatePreparedData(scaler.fit_transform(dataPrepared))
         return {"Message":f"Data scaled using {selected_scaler} Successfully."},200
@@ -294,24 +291,23 @@ class TrainModel(Resource):
     def get(self):
         train_x=train_data.drop(target,axis=1)
         train_y=train_data[target].copy()
-        match mlModel:
-            case "LinearRegression":
+        if mlModel=="LinearRegression":
                 lin_reg=LinearRegression()
                 lin_reg.fit(train_x,train_y)
                 setBot(lin_reg)
-            case "DecisionTreeRegressor":
+        elif mlModel=="DecisionTreeRegressor":
                 tree_reg=DecisionTreeRegressor(random_state=42)
                 tree_reg.fit(train_x,train_y)
                 setBot(tree_reg)
-            case "RandomForestRegressor":
+        if mlModel== "RandomForestRegressor":
                 forest_reg=RandomForestRegressor()
                 forest_reg.fit(train_x,train_y)
                 setBot(forest_reg)
-            case "SGDClassifier":
+        if mlModel== "SGDClassifier":
                 sgd_clf=SGDClassifier(random_state=42)
                 sgd_clf.fit(train_x,train_y)
                 setBot(sgd_clf)
-            case "SVC":
+        if mlModel== "SVC":
                 svm_clf=SVC()
                 svm_clf.fit(train_x,train_y)
                 setBot(svm_clf)
@@ -325,8 +321,7 @@ class ModelEcaluate(Resource):
         test_y=test_data[target].copy()
         train_x=train_data.drop(target,axis=1)
         train_y=train_data[target].copy()
-        match problem:
-            case "Regression":
+        if problem== "Regression":
                 predictions=bot.predict(train_x)
                 mse=mean_squared_error(train_y,predictions)
                 rmse=np.sqrt(mse)
@@ -335,7 +330,7 @@ class ModelEcaluate(Resource):
                 mse=mean_squared_error(test_y,predictions)
                 rmse=np.sqrt(mse)
                 res["RMSE on Test data"]=str(rmse)
-            case "Classification":
+        elif problem== "Classification":
                 predictions=bot.predict(train_x)
                 res["train"]['precision_score']=str( precision_score(train_y,predictions))
                 res["train"]['recall_score']=str(recall_score(train_y,predictions))
