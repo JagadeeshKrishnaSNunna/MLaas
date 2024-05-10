@@ -1,0 +1,24 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Covid19 Dashboard</title>
+</head>
+<body>
+    <center>
+        <h1 style="color: blue;">Covid19 Dashboard</h1>
+        <h4>last updated on {{update}}</h4>
+    </center>
+    <div style="color: white;border-color: blue;background-color: black;">
+        {{ df_table|safe }}
+    </div>
+    <br>
+    <br>
+    <img src='./../static/cases_state.png' alt="Matplotlib Plot">
+    <br>
+    <img src='./../static/death_state.png' alt="Matplotlib Plot">
+    <br>
+    <img src='./../static/new_death_state.png' alt="Matplotlib Plot">
+</body>
+</html>
